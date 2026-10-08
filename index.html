@@ -82,7 +82,7 @@ input,select,textarea{
   padding:10px;font-size:16px;font-family:inherit;width:100%
 }
 input[type=date]{min-height:44px}
-.wrow input{width:88px;text-align:center}
+.wrow input{width:118px;text-align:center}
 button.act{
   background:var(--accent);color:#fff;border:0;border-radius:10px;padding:11px 16px;
   font-size:14px;font-family:inherit;font-weight:500;cursor:pointer;min-height:44px
@@ -1056,11 +1056,11 @@ details[open] summary{margin-bottom:8px}
       var wrow = document.createElement("div");
       wrow.className = "wrow";
       var lab = document.createElement("label");
-      lab.textContent = "用的重量";
+      lab.textContent = "难度级别";
       var inp = document.createElement("input");
       inp.type = "text";
-      inp.inputMode = "decimal";
-      inp.placeholder = "kg";
+      inp.inputMode = "text";
+      inp.placeholder = "例：标准";
       inp.value = state.weights[ex.n] || "";
       inp.addEventListener("input", function(){
         state.weights[ex.n] = inp.value;
@@ -1072,7 +1072,7 @@ details[open] summary{margin-bottom:8px}
       });
       var unit = document.createElement("span");
       unit.className = "muted";
-      unit.textContent = "kg（写一次就记住了）";
+      unit.textContent = "（写一次就记住了）";
       wrow.appendChild(lab); wrow.appendChild(inp); wrow.appendChild(unit);
       box.appendChild(wrow);
 
