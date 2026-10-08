@@ -1,0 +1,1326 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f1614">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>薄肌计划 · 徒手家庭版</title>
+<style>
+:root{
+  --bg:#0f1614; --surface:#18211e; --surface2:#202b27; --line:#2c3a35;
+  --fg:#eef4f1; --muted:#98b0a8; --accent:#2bbf8e; --ok:#3ecf8e; --warn:#ffb454;
+}
+@media (prefers-color-scheme: light){
+  :root{
+    --bg:#f4f8f6; --surface:#ffffff; --surface2:#edf3f0; --line:#dbe6e1;
+    --fg:#15201c; --muted:#5d6f69; --accent:#0f9d76; --ok:#12a06a; --warn:#a86a00;
+  }
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg);color:var(--fg);
+  font:16px/1.5 -apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  padding-bottom:calc(72px + env(safe-area-inset-bottom));
+}
+header{
+  position:sticky;top:0;z-index:20;background:var(--bg);
+  padding:calc(10px + env(safe-area-inset-top)) 16px 10px;
+  border-bottom:1px solid var(--line);
+}
+h1{font-size:17px;margin:0;font-weight:600}
+.sub{color:var(--muted);font-size:13px;margin-top:2px}
+main{padding:12px 12px 24px}
+.tab{display:none}
+.tab.on{display:block}
+nav{
+  position:fixed;left:0;right:0;bottom:0;z-index:30;display:flex;
+  background:var(--surface);border-top:1px solid var(--line);
+  padding-bottom:env(safe-area-inset-bottom);
+}
+nav button{
+  flex:1;background:none;border:0;color:var(--muted);padding:12px 4px 14px;
+  font-size:12px;font-family:inherit;cursor:pointer;min-height:56px;
+}
+nav button .ico{display:block;font-size:19px;line-height:1.2}
+nav button[aria-selected="true"]{color:var(--accent)}
+section, .card{background:var(--surface);border:1px solid var(--line);border-radius:14px}
+.card{padding:14px;margin-bottom:12px}
+h2{font-size:15px;margin:0 0 10px;font-weight:600}
+h3{font-size:14px;margin:16px 0 8px;font-weight:600;color:var(--muted)}
+.row{display:flex;align-items:center;gap:10px}
+.between{justify-content:space-between}
+.muted{color:var(--muted);font-size:13px}
+.big{font-size:22px;font-weight:600}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:4px 0 8px;-webkit-overflow-scrolling:touch}
+.chip{
+  flex:0 0 auto;border:1px solid var(--line);background:var(--surface2);color:var(--muted);
+  border-radius:999px;padding:8px 14px;font-size:13px;font-family:inherit;cursor:pointer;min-height:38px;
+}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.ex{border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px;background:var(--surface)}
+.ex.done{border-color:var(--ok)}
+.ex .name{font-weight:600;font-size:15px}
+.ex .meta{color:var(--muted);font-size:13px;margin-top:2px}
+.cue{color:var(--muted);font-size:12.5px;margin-top:6px;border-left:2px solid var(--line);padding-left:8px}
+.sets{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.set{
+  width:46px;height:46px;border-radius:12px;border:1px solid var(--line);background:var(--surface2);
+  color:var(--muted);font-size:14px;font-family:inherit;cursor:pointer;
+}
+.set[aria-pressed="true"]{background:var(--ok);border-color:var(--ok);color:#06251a;font-weight:600}
+.wrow{display:flex;align-items:center;gap:8px;margin-top:10px}
+.wrow label{font-size:12.5px;color:var(--muted);flex:0 0 auto}
+input,select,textarea{
+  background:var(--surface2);color:var(--fg);border:1px solid var(--line);border-radius:10px;
+  padding:10px;font-size:16px;font-family:inherit;width:100%
+}
+input[type=date]{min-height:44px}
+.wrow input{width:88px;text-align:center}
+button.act{
+  background:var(--accent);color:#fff;border:0;border-radius:10px;padding:11px 16px;
+  font-size:14px;font-family:inherit;font-weight:500;cursor:pointer;min-height:44px
+}
+button.ghost{
+  background:var(--surface2);color:var(--fg);border:1px solid var(--line);
+  border-radius:10px;padding:11px 16px;font-size:14px;font-family:inherit;cursor:pointer;min-height:44px
+}
+.progress{height:8px;background:var(--surface2);border-radius:999px;overflow:hidden;margin-top:8px}
+.progress i{display:block;height:100%;background:var(--ok);border-radius:999px;transition:width .25s}
+.timer{
+  display:none;position:sticky;top:56px;z-index:15;background:var(--surface2);
+  border:1px solid var(--accent);border-radius:12px;padding:10px 14px;margin-bottom:12px;
+  align-items:center;justify-content:space-between
+}
+.timer.on{display:flex}
+.timer .t{font-size:24px;font-weight:600;font-variant-numeric:tabular-nums}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);white-space:nowrap}
+th{color:var(--muted);font-weight:500}
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grid2 .f{display:flex;flex-direction:column;gap:4px}
+.grid2 label{font-size:12.5px;color:var(--muted)}
+.chart{margin-top:6px}
+.empty{color:var(--muted);font-size:13px;padding:16px 0;text-align:center}
+.tag{display:inline-block;font-size:11.5px;padding:2px 8px;border-radius:999px;background:var(--surface2);color:var(--muted);margin-left:6px}
+.list{margin:0;padding-left:18px;font-size:13.5px;color:var(--fg)}
+.list li{margin:4px 0}
+.swap{width:100%;border-collapse:collapse;font-size:13px}
+.swap td,.swap th{padding:6px 8px;border-bottom:1px solid var(--line);white-space:normal}
+.note{font-size:12.5px;color:var(--muted);margin-top:8px}
+details{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px;background:var(--surface)}
+summary{cursor:pointer;font-size:14px;font-weight:500}
+details[open] summary{margin-bottom:8px}
+.detailbtn{
+  display:block;width:100%;margin-top:10px;background:var(--surface2);color:var(--accent);
+  border:1px solid var(--line);border-radius:10px;padding:9px 12px;font-size:13.5px;
+  font-family:inherit;cursor:pointer;min-height:42px;text-align:left
+}
+.detail{margin-top:10px;padding:12px;border-radius:10px;background:var(--surface2);border:1px solid var(--line)}
+.detail .sec{margin-bottom:13px}
+.detail .sec:last-child{margin-bottom:0}
+.detail .sec b{display:block;font-size:13px;margin-bottom:4px;color:var(--accent)}
+.detail .dtxt{font-size:13px;line-height:1.7}
+.detail ol.list{font-size:13px;padding-left:20px;margin:0}
+.detail ol.list li{margin:6px 0}
+</style>
+</head>
+<body>
+
+<header>
+  <h1 id="today-title">薄肌计划 · 徒手家庭版</h1>
+  <div class="sub" id="today-sub">加载中…</div>
+</header>
+
+<main>
+  <!-- ============ 今日 ============ -->
+  <div class="tab on" id="tab-today">
+    <div class="chips" id="day-chips"></div>
+
+    <div class="timer" id="timer">
+      <div>
+        <div class="muted">组间休息</div>
+        <div class="t" id="timer-num">--</div>
+      </div>
+      <div class="row">
+        <button class="ghost" id="timer-add">+30s</button>
+        <button class="ghost" id="timer-stop">停止</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="row between">
+        <div>
+          <div class="big" id="plan-name">—</div>
+          <div class="muted" id="plan-count">—</div>
+        </div>
+        <div style="text-align:right">
+          <div class="big" id="done-pct">0%</div>
+          <div class="muted">完成度</div>
+        </div>
+      </div>
+      <div class="progress"><i id="done-bar" style="width:0%"></i></div>
+    </div>
+
+    <div id="ex-list"></div>
+
+    <div class="card">
+      <h2>今天的流程</h2>
+      <ol class="list">
+        <li>有氧热身 5 分钟</li>
+        <li>关节活动 + 激活 5 分钟</li>
+        <li>第一个动作热身组：最难的变式做 1 组 8 次即可（徒手不需要重量热身）</li>
+        <li>正式训练（点右边的方块记录每一组）</li>
+        <li>拉伸 5 分钟</li>
+      </ol>
+      <div class="note">点任意一组会开始组间休息倒计时。休息结束会有提示音和震动。</div>
+    </div>
+  </div>
+
+  <!-- ============ 记录 ============ -->
+  <div class="tab" id="tab-log">
+    <div class="card">
+      <h2>每周记录</h2>
+      <div class="grid2">
+        <div class="f"><label for="f-date">日期</label><input type="date" id="f-date"></div>
+        <div class="f"><label for="f-weight">体重 kg</label><input type="number" step="0.1" id="f-weight" placeholder="75.0"></div>
+        <div class="f"><label for="f-waist">腰围 cm</label><input type="number" step="0.1" id="f-waist" placeholder="92"></div>
+        <div class="f"><label for="f-arm">臂围 cm</label><input type="number" step="0.1" id="f-arm" placeholder="30"></div>
+        <div class="f"><label for="f-calf">小腿 cm</label><input type="number" step="0.1" id="f-calf" placeholder="36"></div>
+        <div class="f"><label for="f-sleep">睡眠 小时</label><input type="number" step="0.5" id="f-sleep" placeholder="7.5"></div>
+      </div>
+      <div class="f" style="margin-top:10px;display:flex;flex-direction:column;gap:4px">
+        <label for="f-note">备注</label><input type="text" id="f-note" placeholder="精力、酸痛、外食…">
+      </div>
+      <div class="row" style="margin-top:12px">
+        <button class="act" id="save-log">保存记录</button>
+        <button class="ghost" id="clear-form">清空</button>
+      </div>
+      <div class="note">每周日早上、空腹、如厕后、同一条件测量。腰围比体重重要。</div>
+    </div>
+
+    <div class="card">
+      <h2>体重趋势</h2>
+      <div class="chart" id="chart-weight"></div>
+    </div>
+
+    <div class="card">
+      <h2>腰围趋势</h2>
+      <div class="chart" id="chart-waist"></div>
+    </div>
+
+    <div class="card">
+      <h2>历史记录</h2>
+      <div class="scroll"><table id="log-table"></table></div>
+    </div>
+
+    <div class="card">
+      <h2>数据备份</h2>
+      <div class="note">换手机、换浏览器、或清缓存前，先导出一次。数据只存在这台设备上，不会上传到任何地方。</div>
+      <div class="row" style="margin-top:10px;flex-wrap:wrap">
+        <button class="ghost" id="btn-export">导出备份</button>
+        <button class="ghost" id="btn-copy">复制数据</button>
+      </div>
+      <div style="margin-top:12px">
+        <label class="muted" for="import-box">粘贴备份数据后点导入</label>
+        <textarea id="import-box" rows="3" placeholder='{"logs":[...]}'></textarea>
+        <div class="row" style="margin-top:8px">
+          <button class="ghost" id="btn-import">导入</button>
+          <span class="muted" id="import-msg"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 速查 ============ -->
+  <div class="tab" id="tab-ref">
+    <div class="card">
+      <h2>动作要点速查（点「详细步骤」看完整分步）</h2>
+      <div id="ref-ex"></div>
+    </div>
+
+    <div class="card">
+      <h2>徒手怎么选难度</h2>
+      <ul class="list">
+        <li>没有重量可以加，所以靠<b>换变式</b>来调难度</li>
+        <li>判断标准：当前变式能标准做 <b>3 组 × 12 次</b>，就升级到下一级</li>
+        <li>做完还剩 5 次余力＝太轻松，升一级；做不到 8 次＝太难，降一级</li>
+        <li>下降阶段慢 2～3 秒，这是最容易被忽略但最有效的一步</li>
+        <li>每组结束时还剩 1～3 次余力，不要每组都练到力竭</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>动作进阶阶梯（照着往上升）</h2>
+      <table class="swap">
+        <tr><td><b>推（胸/三头）</b></td><td>手撑桌子 → 跪姿俯卧撑 → 标准俯卧撑 → 下斜俯卧撑 → 钻石俯卧撑</td></tr>
+        <tr><td><b>推（肩）</b></td><td>跪姿派克 → 标准派克 → 脚垫高的派克 → 靠墙倒立撑</td></tr>
+        <tr><td><b>拉（背/二头）</b></td><td>屈膝踩地反向划船 → 腿伸直的 → 脚搭椅子上的 → 反握练二头</td></tr>
+        <tr><td><b>腿</b></td><td>自重深蹲 → 相扑深蹲 → 箭步蹲 → 保加利亚分腿蹲 → 单腿蹲</td></tr>
+        <tr><td><b>腿后侧/臀</b></td><td>双腿臀桥 → 单腿臀桥 → 臀桥行进 → 单腿硬拉</td></tr>
+        <tr><td><b>核心</b></td><td>死虫式 → 平板支撑 → 抬脚平板 → 侧平板 → 单臂平板</td></tr>
+        <tr><td><b>小腿</b></td><td>双腿提踵 → 单腿提踵 → 单腿提踵放慢到 4 秒</td></tr>
+      </table>
+      <div class="note">每一列都从最简单的开始，能标准做 3 组 × 12 次再往右升一级。</div>
+    </div>
+
+    <div class="card">
+      <h2>徒手增加难度的 8 个手段</h2>
+      <ol class="list">
+        <li>换更难的变式（杠杆原理：脚抬高、手放低、身体越水平越难）</li>
+        <li>加次数：8 → 15 次</li>
+        <li>加组数：3 → 4 组</li>
+        <li>放慢离心：2 秒 → 4 秒</li>
+        <li>顶峰停顿 1～2 秒</li>
+        <li>单侧化：双手改单手，双腿改单腿</li>
+        <li>缩短休息 90 → 60 秒</li>
+        <li>减少支撑点：四点撑改三点撑，脚并起来</li>
+      </ol>
+    </div>
+
+    <div class="card">
+      <h2>⚠️ 徒手方案的短板（必须知道）</h2>
+      <table class="swap">
+        <tr><td><b>背部宽度</b></td><td>⚠️ 最弱。没有单杠就练不到背阔肌的宽度，只能靠桌下反向划船勉强凑</td></tr>
+        <tr><td><b>二头肌</b></td><td>⚠️ 很弱。只有反握反向划船能练到</td></tr>
+        <tr><td><b>腿和臀</b></td><td>✅ 单侧动作够难，基本不吃亏</td></tr>
+        <tr><td><b>胸和三头</b></td><td>✅ 俯卧撑变式够用</td></tr>
+        <tr><td><b>小腿</b></td><td>✅ 单腿提踵够用</td></tr>
+        <tr><td><b>减脂效果</b></td><td>✅ 完全不受影响。减脂靠的是饮食缺口和步数</td></tr>
+      </table>
+      <div class="note"><b>花 100～150 元能补齐 80% 的短板</b>：① 门上单杠（50～100 元）——练引体，解决背部宽度 ② 弹力带一套（30～50 元）——补齐面拉、划船、二头。这两样占地几乎为零。</div>
+    </div>
+
+
+    <div class="card">
+      <h2>食物交换表 · 蛋白（每份约 20 g）</h2>
+      <table class="swap">
+        <tr><td>鸡胸肉</td><td>生重 90 g</td><td>110 kcal</td></tr>
+        <tr><td>猪里脊</td><td>生重 100 g</td><td>145 kcal</td></tr>
+        <tr><td>牛腱 / 瘦牛肉</td><td>生重 100 g</td><td>130 kcal</td></tr>
+        <tr><td>鲈鱼 / 鳕鱼 / 龙利鱼</td><td>生重 110 g</td><td>100 kcal</td></tr>
+        <tr><td>虾仁</td><td>生重 110 g</td><td>100 kcal</td></tr>
+        <tr><td>鸡蛋</td><td>3 个</td><td>216 kcal</td></tr>
+        <tr><td>北豆腐</td><td>170 g</td><td>195 kcal</td></tr>
+        <tr><td>无糖希腊酸奶</td><td>200 g</td><td>150 kcal</td></tr>
+        <tr><td>蛋白粉</td><td>1 勺约 27 g</td><td>105 kcal</td></tr>
+      </table>
+      <div class="note">同一列可以互换：鸡胸吃腻了换成等蛋白的牛肉或虾，配方不用重算。</div>
+    </div>
+
+    <div class="card">
+      <h2>食物交换表 · 主食（每份约 40 g 碳水）</h2>
+      <table class="swap">
+        <tr><td>米饭（熟）</td><td>150 g</td><td>175 kcal</td></tr>
+        <tr><td>面条（熟）</td><td>160 g</td><td>175 kcal</td></tr>
+        <tr><td>馒头</td><td>85 g</td><td>187 kcal</td></tr>
+        <tr><td>全麦面包</td><td>2.5 片</td><td>225 kcal</td></tr>
+        <tr><td>燕麦片（干）</td><td>65 g</td><td>247 kcal</td></tr>
+        <tr><td>红薯</td><td>200 g</td><td>172 kcal</td></tr>
+        <tr><td>玉米（可食部）</td><td>210 g</td><td>180 kcal</td></tr>
+        <tr><td>土豆</td><td>235 g</td><td>181 kcal</td></tr>
+      </table>
+      <div class="note">土豆、红薯、玉米、山药、莲藕算主食，不算蔬菜。</div>
+    </div>
+
+    <div class="card">
+      <h2>加速版 · 每天这么吃</h2>
+      <table class="swap">
+        <tr><td>早餐</td><td>鸡蛋 2 个 + 燕麦 40 g + 无糖希腊酸奶 150 g + 蓝莓 100 g</td></tr>
+        <tr><td>午餐</td><td>米饭 200 g + 鸡胸 200 g + 西兰花 150 g + 彩椒 100 g + 油 5 ml</td></tr>
+        <tr><td>加餐</td><td>无糖酸奶 100 g + 坚果 12 g + 黄瓜 150 g</td></tr>
+        <tr><td>练后</td><td>蛋白粉 1 勺 + 香蕉 1 根（只训练日）</td></tr>
+        <tr><td>晚餐</td><td>红薯 150 g + 清蒸鲈鱼 180 g + 时蔬 250 g + 油 5 ml</td></tr>
+      </table>
+      <div class="note">合计约 150 g 蛋白 / 1830 kcal。休息日去掉香蕉，蛋白粉挪到早餐。</div>
+    </div>
+
+    <div class="card">
+      <h2>不能碰的隐形热量</h2>
+      <ul class="list">
+        <li>全糖奶茶 500 ml ≈ 500～600 kcal（最大杀手）</li>
+        <li>坚果一把 50 g ≈ 300 kcal，必须称重</li>
+        <li>沙拉酱 2 勺 ≈ 150 kcal，换成油醋汁</li>
+        <li>火锅麻酱 2 勺 ≈ 180 kcal，换成蒜末+醋+生抽</li>
+        <li>果汁、加糖拿铁、啤酒、勾芡糖醋菜</li>
+      </ul>
+    </div>
+  </div>
+</main>
+
+<nav>
+  <button id="nav-today" aria-selected="true"><span class="ico">🏋️</span>今日</button>
+  <button id="nav-log"><span class="ico">📈</span>记录</button>
+  <button id="nav-ref"><span class="ico">📖</span>速查</button>
+</nav>
+
+<script>
+(function(){
+  "use strict";
+
+  // ---------- 训练内容 ----------
+  var PLAN = {
+    1:{name:"推 · 胸/肩/三头", ex:[
+      {n:"俯卧撑（按阶梯选难度）",s:4,r:"8-12",rest:90,c:"身体一条直线，肘与身体 45°；做不动就把手撑高"},
+      {n:"派克俯卧撑",s:3,r:"8-12",rest:90,c:"臀部顶高成倒 V 字，头顶朝地面下放；这是徒手练肩的主力"},
+      {n:"椅子臂屈伸",s:3,r:"10-12",rest:60,c:"背对椅子双手撑边，肘向后弯；先把肩胛往下压，别耸肩"},
+      {n:"下斜俯卧撑",s:2,r:"力竭-2",rest:90,c:"脚搭在椅子或床上，练上胸；腰不能塌"},
+      {n:"平板支撑",s:3,r:"45-60 秒",rest:45,c:"肘在肩正下方，不塌腰不翘臀，正常呼吸"}
+    ]},
+    2:{name:"腿 + 核心", ex:[
+      {n:"自重深蹲",s:3,r:"15-20",rest:90,c:"脚略宽于肩，膝盖顺脚尖方向推出去；蹲到大腿平行"},
+      {n:"保加利亚分腿蹲",s:3,r:"10-12 / 侧",rest:90,c:"后脚背搭椅子上，前脚迈大步；前脚跟推地站起"},
+      {n:"单腿臀桥",s:3,r:"12 / 侧",rest:60,c:"一只脚踩地，另一腿抱向胸口；顶峰夹紧停 2 秒"},
+      {n:"单腿提踵",s:4,r:"15-20 / 侧",rest:45,c:"前脚掌踩台阶，扶着墙；顶峰停 1-2 秒，下放到脚跟低于台面"},
+      {n:"靠墙静蹲",s:2,r:"45-60 秒",rest:60,c:"背贴墙下滑，大腿与地面平行，膝盖约 90°"},
+      {n:"死虫式 / 卷腹",s:3,r:"12-15",rest:45,c:"死虫式全程腰贴地；卷腹不抱头、不拉脖子"}
+    ]},
+    3:{name:"有氧 + 核心", ex:[
+      {n:"快走 / 爬楼梯",s:1,r:"40-50 分钟",rest:0,c:"心率 120-140，能说完整句子但不能唱歌"},
+      {n:"核心循环",s:3,r:"每轮 1 遍",rest:60,c:"卷腹 15 → 登山跑 30 秒 → 侧平板 30 秒/侧"}
+    ]},
+    4:{name:"拉 · 背/二头/后束", ex:[
+      {n:"桌下反向划船",s:4,r:"8-12",rest:90,c:"抓桌沿，身体绷直，胸口拉向桌边；先夹肩胛再拉"},
+      {n:"反握反向划船",s:3,r:"8-10",rest:75,c:"反手抓桌沿做，专门练二头；做不动就屈膝踩地"},
+      {n:"俯卧划船",s:3,r:"12-15",rest:60,c:"俯卧，手臂抬离地面，呼气把肘拉到身后，肩胛夹紧"},
+      {n:"超人式",s:3,r:"12-15",rest:60,c:"俯卧同时抬起手脚，顶峰停 1-2 秒；脖子保持中立别后仰"},
+      {n:"俯卧 YTW",s:3,r:"12",rest:60,c:"俯卧，手臂依次摆成 Y、T、W 三个形状抬起；练后束和上背"}
+    ]},
+    5:{name:"腿 + 手臂 + 核心", ex:[
+      {n:"箭步蹲",s:3,r:"12 / 侧",rest:75,c:"向前迈大步下蹲，两个膝盖都弯约 90°，前脚跟推地"},
+      {n:"单腿硬拉（徒手）",s:3,r:"10 / 侧",rest:60,c:"单脚站，另一腿向后伸，上身向前倾；新手一只手扶墙"},
+      {n:"臀桥行进",s:3,r:"10 / 侧",rest:60,c:"臀桥顶住不落，双脚交替抬膝向前迈小步"},
+      {n:"单腿提踵",s:4,r:"20 / 侧",rest:45,c:"踩台阶做全幅度，顶峰停 1 秒"},
+      {n:"椅子臂屈伸",s:3,r:"12",rest:60,c:"双手撑椅子边缘，身体贴着椅子下放"},
+      {n:"侧平板",s:3,r:"30 秒 / 侧",rest:45,c:"肘在肩正下方，髋部顶起来不下沉"}
+    ]},
+    6:{name:"有氧 + 全身循环", ex:[
+      {n:"快走",s:1,r:"30-40 分钟",rest:0,c:"能说完整句子即可"},
+      {n:"自重循环",s:3,r:"每轮 1 遍",rest:90,c:"深蹲 20 → 俯卧撑 10 → 箭步蹲 10/侧 → 平板 40 秒 → 登山跑 30 秒"}
+    ]},
+    0:{name:"休息日", ex:[
+      {n:"轻松散步",s:1,r:"30-40 分钟",rest:0,c:"恢复也是训练的一部分"},
+      {n:"拉伸 + 体态训练",s:1,r:"10 分钟",rest:0,c:"靠墙站、扩胸、死虫、鸟狗"}
+    ]}
+  };
+  var DAY_NAME = ["周日","周一","周二","周三","周四","周五","周六"];
+
+  // ---------- 动作详细步骤 ----------
+  var EXDETAIL = {};
+
+  Object.assign(EXDETAIL, {
+    "俯卧撑（按阶梯选难度）": {
+      setup: [
+        "双手撑地略宽于肩，手腕大致在肩膀正下方",
+        "双脚分开约一脚宽，收腹、收臀，身体从头到脚跟连成一条直线",
+        "先选难度（见下面第 ⑧ 段），选一个你能标准做 8～12 次的版本"
+      ],
+      grip: "五指张开撑地，食指根部和掌根均匀受力，不要只压掌根",
+      gaze: "看地面稍前方（大约身前 30 厘米），不要抬头，也不要把下巴往胸口塞",
+      tempo: "下放 2 秒 → 底部停 0.5 秒 → 推起 1 秒",
+      range: "下放到胸口离地面约一拳（或上臂与地面平行）；推起到手臂接近伸直",
+      feel: "胸、手臂后侧、腹部同时用力",
+      bad: "腰塌下去或屁股翘起来＝核心没收紧；肩膀前面疼＝手肘张成 90 度，要收成 45 度；脖子酸＝头前伸了；只有手臂酸胸没感觉＝手肘没收进去",
+      fix: "难度阶梯，从易到难，能标准做 3 组 × 12 次再升一级：① 手撑桌子/沙发扶手（越高越轻松）② 跪姿俯卧撑 ③ 标准俯卧撑 ④ 下斜俯卧撑（脚搭椅子）⑤ 钻石俯卧撑。做不了 ①就在墙上做",
+      safe: "手腕不舒服就握两只水瓶当把手撑，让手腕保持中立。这个动作不需要任何器材"
+    },
+    "派克俯卧撑": {
+      setup: [
+        "从俯卧撑姿势开始，双脚往手的方向走一小步",
+        "把臀部往天花板顶起来，身体变成一个倒 V 字（像一座小山）",
+        "手与肩同宽，手掌撑地，脚可以踩着地面，膝盖可以微屈"
+      ],
+      grip: "五指张开撑地，重心更多压在前半只手掌",
+      gaze: "看双手之间的地面",
+      tempo: "下放 2～3 秒 → 底部停 0.5 秒 → 推起 1 秒",
+      range: "屈肘，用头顶（不是额头）朝双手之间的地面下放，轻触或接近地面就停；推回到手臂伸直",
+      feel: "肩膀前侧和外侧发酸，比普通俯卧撑明显更累",
+      bad: "臀部往下沉变成普通俯卧撑＝注意保持倒 V 字；脖子用力＝用头顶而不是用脸去够地；肘部向外张＝要沿着身体两侧向后弯",
+      fix: "太难就把脚踩在椅子或床上（脚越高越像倒立撑，也越难）；太简单就把脚垫高，或者改成靠墙倒立撑",
+      safe: "颈部不要承重。如果头顶压得难受，改回普通俯卧撑，肩膀用别的方式练（比如靠墙倒立撑的入门版）"
+    },
+    "椅子臂屈伸": {
+      setup: [
+        "把椅子靠墙放好，绝对不能用带轮子的椅子",
+        "背对椅子坐下，双手撑在椅子座面边缘，手指朝前",
+        "臀部离开椅子，身体悬空，双脚往前伸（膝盖弯着＝容易，腿伸直＝难）",
+        "先把肩膀往下压：肩胛骨下沉，不要耸着肩"
+      ],
+      grip: "手掌撑在座面边缘，手指朝前抓住边缘",
+      gaze: "看正前方",
+      tempo: "下放 2～3 秒 → 底部停 0.5 秒 → 推起 1 秒",
+      range: "屈肘向后，身体贴着椅子竖直下降，降到肘部约 90 度；推回到手臂接近伸直",
+      feel: "手臂后侧（三头）明显发酸，肩膀前侧也会有感觉",
+      bad: "耸肩＝先做肩胛下沉再开始；肘部向外张＝要沿着身体两侧向后弯；肩膀前面疼＝下降太低了，把幅度减小",
+      fix: "太难就把膝盖弯起来、脚往身体方向收；太简单就把脚伸得更远，或者把另一只脚搭在伸出的腿上（单腿臂屈伸）",
+      safe: "肩膀有旧伤或做的时候肩前侧刺痛，就换成上斜俯卧撑把三头练掉。椅子必须靠墙，不然会滑走"
+    },
+    "下斜俯卧撑": {
+      setup: [
+        "把双脚搭在椅子、沙发或床沿上（高度 30～45 厘米起步）",
+        "双手撑在地面，略宽于肩，手腕在肩膀正下方",
+        "收腹收臀，身体从头到脚一条直线，不要塌腰"
+      ],
+      grip: "五指张开撑地，掌根受力",
+      gaze: "看地面稍前方",
+      tempo: "下放 2 秒 → 底部停 0.5 秒 → 推起 1 秒",
+      range: "下放到胸口离地约一拳；推起到手臂接近伸直",
+      feel: "上胸（锁骨下方那一片）和肩膀前侧发力更明显",
+      bad: "腰塌下去＝核心没收紧；肩膀前侧疼＝脚垫太高了，降低高度或收肘",
+      fix: "脚的高度决定难度，觉得吃力就把脚放低一点。这是练上胸最有效、且完全不需要器材的动作",
+      safe: "脚搭的东西必须稳固。上斜面的椅子要抵住墙，别用会滑的凳子"
+    },
+    "平板支撑": {
+      setup: [
+        "肘部撑地，位置在肩膀正下方；小臂贴地",
+        "双脚分开与髋同宽，身体从头到脚连成一条直线",
+        "收腹、收臀，感觉肚脐往脊柱方向收"
+      ],
+      grip: "手握拳或者手掌平放都可以，不要用力攥",
+      gaze: "看身前的地面，不要抬头也不要低头，保持颈椎中立",
+      tempo: "静态保持 45～60 秒，正常呼吸不要憋气",
+      range: "保持到身体开始抖动、或者腰要塌的时候就停。宁可 30 秒标准，不要 90 秒塌腰",
+      feel: "腹部、臀部、大腿前侧同时收紧",
+      bad: "屁股翘起来或腰往下塌＝核心没用力；肩膀疼＝肘部不在肩膀正下方；脖子酸＝抬头了",
+      fix: "用手机录一段侧面视频，一眼就能看出腰有没有塌。太简单就抬一只脚，或者改成只用手肘和脚尖三点支撑",
+      safe: "腰痛的人优先做死虫式，对腰椎更友好"
+    },
+    "自重深蹲": {
+      setup: [
+        "双脚站距略宽于肩（约一肩半），脚尖向外转 15～30 度",
+        "双手可以向前平举保持平衡（不要抱头）",
+        "挺胸、收腹，眼睛看正前方"
+      ],
+      grip: "不需要器材，双手向前平举或交叉抱在胸前",
+      gaze: "看正前方稍下方（大约 2 米外的地面），不要低头看脚",
+      tempo: "下蹲 2～3 秒 → 底部停 0.5 秒 → 站起 1～2 秒",
+      range: "蹲到大腿与地面平行，或者蹲到你「能保持背部挺直」的最低点。蹲不到平行没关系，先保证背是直的",
+      feel: "大腿前侧和臀部发酸，做到后面大腿会发抖",
+      bad: "膝盖往里扣＝想着用膝盖把脚尖推开；脚跟离地＝重心太靠前，脚掌三点踩实；腰弓起来＝蹲太深了，缩短幅度",
+      fix: "蹲不下去先做箱式深蹲：身后放一把椅子，每次蹲到轻碰椅子就站起。觉得太轻松就放慢下蹲到 3 秒，或者改成相扑深蹲（站距更宽、脚尖更外）",
+      safe: "起身时用整个脚掌推地，膝盖不要左右晃。膝盖有刺痛就停，改做靠墙静蹲"
+    },
+    "保加利亚分腿蹲": {
+      setup: [
+        "背对椅子（高约 40 厘米）站立，把后脚的脚背搭在椅子边缘",
+        "前脚往前迈出一大步。距离决定难度：越远越练臀，越近越练腿",
+        "躯干略前倾约 10 度，双手可以叉腰或前平举保持平衡"
+      ],
+      grip: "不需要器材；站不稳就一只手扶着墙或椅子靠背",
+      gaze: "看正前方，不要低头看脚",
+      tempo: "下蹲 2～3 秒 → 底部停 0.5 秒 → 站起 2 秒",
+      range: "身体垂直下沉，前腿膝盖顺着脚尖方向弯，下到大腿接近与地面平行；用前脚的脚跟推地站起来",
+      feel: "前腿的臀部和大腿前侧发酸，做完会明显发抖",
+      bad: "后脚在帮忙蹬地＝前脚往前多迈一点；身体左右歪＝先徒手做、一只手扶墙；前脚膝盖压力大＝前脚站太近了，往前多迈 10 厘米",
+      fix: "这是徒手动作里对腿和臀刺激最强的之一，不需要任何重量就够难。前两周扶着做完全没问题，能标准做 3 组 × 12 次再考虑加难度（前脚踩高一点）",
+      safe: "膝盖有刺痛就改成反向箭步蹲（向后迈步下蹲再回来），对膝盖更友好"
+    },
+    "单腿臀桥": {
+      setup: [
+        "仰卧屈膝，一只脚踩地",
+        "另一条腿伸直，或者屈膝抱向胸口",
+        "双手放身体两侧，掌心向下压地"
+      ],
+      grip: "不需要器材，手掌向下压地稳定身体",
+      gaze: "看天花板，颈部放松",
+      tempo: "顶起 1 秒 → 顶峰停 2 秒 → 下放 3 秒",
+      range: "顶到躯干与大腿一条直线；顶峰臀部夹紧停 2 秒；下放时臀部轻触地面但不放松",
+      feel: "支撑腿那一侧的臀部强烈收缩",
+      bad: "用腰发力（下背先酸）＝先收腹再顶；髋部两侧不一样高＝骨盆歪了，速度放慢；支撑脚放太远＝大腿后侧酸",
+      fix: "把手放在臀部上，臀部必须先变硬。还是找不到感觉就先做双腿臀桥，找到感觉再改单腿",
+      safe: "颈部放松，不要用头撑地；左右各做完再换边"
+    },
+    "单腿提踵": {
+      setup: [
+        "前脚掌踩在台阶、厚书或凳子边缘，脚跟完全悬空",
+        "另一只脚勾起来，用单腿承重",
+        "一只手扶墙或扶手保持平衡，膝盖微屈固定住"
+      ],
+      grip: "不需要器材；扶着墙只是为了平衡，不要用手臂分担重量",
+      gaze: "看正前方",
+      tempo: "踮起 1 秒 → 顶峰停 1～2 秒 → 下放 2～3 秒 → 底部停 1 秒",
+      range: "踮到最高点；下放到脚跟低于台阶平面，感受小腿后侧被拉长",
+      feel: "小腿后侧明显酸胀，做到后面会发抖",
+      bad: "靠弹跳甩上去＝最常见的错误，等于白练；幅度只在中段晃＝没拉伸到位；扶墙时用手臂把身体撑起来＝重量跑到手臂上了",
+      fix: "徒手单腿提踵对小腿来说强度足够，关键是全幅度加顶峰停顿。太轻松就放慢下放到 4 秒，或者背上背一个书包（装几本书）增加负重",
+      safe: "踩台阶一定要扶着东西，重心不稳容易崴脚"
+    },
+    "靠墙静蹲": {
+      setup: [
+        "背贴墙站直，双脚往前迈出约一步半",
+        "双脚与髋同宽，脚尖朝前",
+        "背沿墙慢慢往下滑，滑到大腿与地面平行、膝盖约 90 度"
+      ],
+      grip: "不需要器材，双手自然放在大腿上或前平举",
+      gaze: "看正前方",
+      tempo: "静态保持 45～60 秒，正常呼吸",
+      range: "大腿与地面平行、膝盖约 90 度就是标准位置；保持到腿开始发抖再坚持 10 秒",
+      feel: "大腿前侧强烈灼烧感，这是正常现象",
+      bad: "膝盖超过脚尖太多＝脚往前多迈一点；屁股滑得太低（膝盖小于 90 度）＝会明显加大膝盖压力；膝盖内扣＝把膝盖对准脚尖方向",
+      fix: "太轻松就单腿做（另一条腿抬起），或者手上拿两瓶水。这个动作对膝盖的稳定性也很有帮助",
+      safe: "膝盖有刺痛就停。感觉到的是大腿灼烧，而不是膝盖疼，这是判断做得对不对的标准"
+    },
+    "死虫式 / 卷腹": {
+      setup: [
+        "卷腹：仰卧屈膝，双脚踩地，双手轻放在耳朵两侧（不要抱头）",
+        "死虫式：仰卧，双手举起指向天花板，双腿抬起屈膝 90 度",
+        "死虫式的唯一关键：腰要用力压住地面，全程不能出现空隙"
+      ],
+      grip: "卷腹时手指轻轻搭在耳后，不要用手拉脖子；死虫式不需要握东西",
+      gaze: "看天花板或膝盖方向",
+      tempo: "卷腹：卷起 1 秒 → 顶端停 1 秒 → 下放 2 秒。死虫：伸出 2 秒 → 收回 2 秒",
+      range: "卷腹用腹部把肩胛骨卷离地面（大约抬起 15～20 厘米），腰部始终贴地；死虫式把对侧手脚伸到接近地面但不碰地",
+      feel: "腹部收紧发酸；卷腹主要是上腹，死虫是整片深层腹部",
+      bad: "脖子酸＝用手拉头了；腰离开地面、整个背抬起来＝变成仰卧起坐了，幅度太大；做死虫时腰离地＝伸太远了，缩短幅度",
+      fix: "把手交叉放在胸口做卷腹，就没法拉脖子。腰痛的人优先做死虫式，对腰椎更友好",
+      safe: "卷腹练的是腹肌力量，不是减肚子。肚子上的脂肪只能靠饮食缺口——腹肌现在就在你身上，只是被盖住了"
+    }
+  });
+
+  Object.assign(EXDETAIL, {
+    "快走 / 爬楼梯": {
+      setup: [
+        "户外快走，或者小区、写字楼的楼梯间爬楼",
+        "爬楼梯的规矩：上楼走上去，下楼坐电梯——下楼对膝盖的冲击是上楼的 3 倍以上",
+        "身体站直，眼睛看正前方"
+      ],
+      grip: "不需要器材；爬楼时扶扶手只是保平衡，不要用手臂把身体拉上去",
+      gaze: "看正前方",
+      tempo: "持续 40～50 分钟，中途可以停 1～2 次喝水",
+      range: "强度标准：能说完整的句子，但不能唱歌（心率大约 120～140）",
+      feel: "微微出汗，呼吸加快但不喘，走完腿有点酸但不影响第二天",
+      bad: "太轻松＝加快速度或改成爬楼梯；喘到说不出话＝降速度",
+      fix: "爬楼梯是家庭场景下性价比最高的有氧：20～30 分钟爬楼大约相当于 40 分钟快走，还完全不用出门",
+      safe: "膝盖不舒服就只做平路快走或原地踏步。体重还没降下来时不要跑步"
+    },
+    "核心循环": {
+      setup: [
+        "瑜伽垫铺好，依次做：卷腹 15 次 → 登山跑 30 秒 → 侧平板 30 秒（每侧）",
+        "这三个动作连着做，中间不休息，做完算 1 轮",
+        "一轮做完休息 60 秒，做 3 轮"
+      ],
+      grip: "不需要器材",
+      gaze: "卷腹看膝盖方向；登山跑看地面；侧平板看正前方",
+      tempo: "整轮约 2～3 分钟，休息 60 秒",
+      range: "登山跑：手撑地，膝盖交替往胸口方向提，速度以能保持腰不塌为准",
+      feel: "腹部持续发酸，做完会喘",
+      bad: "登山跑时屁股越抬越高＝速度太快了，放慢；侧平板髋部下垂＝没顶起来",
+      fix: "太轻松就把每轮的动作次数加 5 次，或者把休息从 60 秒减到 45 秒",
+      safe: "楼下有邻居的话，登山跑脚下垫个垫子，或者改成死虫式"
+    },
+    "桌下反向划船": {
+      setup: [
+        "找一张稳固的桌子。先用手用力往下压一压桌面，测试它会不会晃、会不会翘——这一步不能省",
+        "仰躺到桌子下面，双手抓住桌沿，与肩同宽",
+        "身体绷直成一条线，脚跟着地，脚越往前伸、身体越接近水平，动作就越难"
+      ],
+      grip: "正握桌沿，拇指在桌子下方扣住，握紧",
+      gaze: "看天花板（身体正上方）",
+      tempo: "上拉 1 秒 → 顶峰停 1 秒 → 下放 2～3 秒",
+      range: "先把肩胛骨往中间夹，再把胸口拉向桌沿；下放到手臂完全伸直、肩膀被拉长",
+      feel: "背部中段和腋下后方发酸，顶峰能感到肩胛骨往中间挤",
+      bad: "臀部往下掉＝身体没绷直，收腹收臀；手臂先酸＝没先夹肩胛；拉不上去＝身体角度太水平了，把脚往回收（屈膝踩地）",
+      fix: "难度靠身体角度调：屈膝踩地最简单 → 腿伸直 → 脚搭在椅子上最难。这是没有任何器材时唯一能有效练到背阔肌的动作，是整套徒手方案里最重要的一个",
+      safe: "只能用稳固的实木桌或金属桌，绝对不要用折叠桌、玻璃桌、茶几或轻飘飘的宜家风桌子。第一次做的时候最好旁边有人看着"
+    },
+    "反握反向划船": {
+      setup: [
+        "和桌下反向划船一样的位置，唯一区别是手型",
+        "双手反握桌沿（掌心朝上/朝向自己），与肩同宽"
+      ],
+      grip: "反握，掌心朝向自己，手指扣住桌沿下沿",
+      gaze: "看天花板",
+      tempo: "上拉 1 秒 → 顶峰停 1 秒 → 下放 2～3 秒",
+      range: "胸口拉向桌沿，肘部贴身体；下放回到手臂完全伸直",
+      feel: "肱二头肌（手臂前侧）明显发力，比正握时强烈得多",
+      bad: "手腕不舒服＝反握对腕关节有压力，可以先做半程适应；肩膀前侧疼＝拉太高了",
+      fix: "反握是徒手情况下少数几个能练到二头的动作。做不动就把脚往回收、屈膝踩地",
+      safe: "如果手腕撑不住这个角度，就改回正握，二头用别的方式慢慢练"
+    },
+    "俯卧划船": {
+      setup: [
+        "趴在瑜伽垫上，双臂向前伸直，掌心朝下",
+        "额头轻轻贴地或者离地一点点，脖子保持中立",
+        "双腿并拢伸直，收紧臀部"
+      ],
+      grip: "不需要器材，双手向前伸直",
+      gaze: "看地面，下巴微收，不要抬头",
+      tempo: "拉起 1 秒 → 顶峰停 1～2 秒 → 下放 2 秒",
+      range: "呼气，把手臂抬离地面，同时屈肘把肘部往身后、往腰部方向拉，肩胛骨用力夹紧；吸气慢慢放下",
+      feel: "肩胛骨之间和后肩发酸",
+      bad: "脖子后仰＝脖子要一直保持中立；只是抬手不夹肩胛＝没有练到中背；腰疼＝抬起幅度太大，脚可以不离地",
+      fix: "这个动作的作用是补上背部「厚度」，配合桌下反向划船一起练。找不到感觉就把动作放慢，顶峰那 2 秒一定要停住",
+      safe: "腰椎不适的话，在肚子下面垫一条毛巾卷，减小腰部压力"
+    },
+    "超人式": {
+      setup: [
+        "趴在瑜伽垫上，双臂向前伸直，双腿并拢伸直",
+        "额头轻贴地面，脖子保持中立",
+        "收腹，先把肚脐往脊柱方向收"
+      ],
+      grip: "不需要器材",
+      gaze: "看地面，全程不要抬头看前面",
+      tempo: "抬起 1～2 秒 → 顶峰停 1～2 秒 → 下放 2 秒",
+      range: "呼气，同时把双臂、胸部和双腿抬离地面（不用抬很高，抬起 10～15 厘米就够）；吸气慢慢放下",
+      feel: "下背、臀部、大腿后侧同时收紧",
+      bad: "脖子后仰、头晕＝抬头了，要一直看地面；腰部刺痛＝抬起太高了，减小幅度；只有腰酸臀没感觉＝启动时先夹屁股",
+      fix: "这是徒手练下背最安全的动作之一，对改善久坐导致的腰背无力很有帮助",
+      safe: "有腰椎间盘问题的人先咨询医生。抬起的高度不是重点，顶峰那 2 秒的收缩才是"
+    },
+    "俯卧 YTW": {
+      setup: [
+        "趴在瑜伽垫上，额头轻贴地面，脖子保持中立",
+        "按顺序做三个形状，每个形状做一轮：Y（手臂斜向前上方成 Y 字）→ T（手臂向两侧平伸成 T 字）→ W（屈肘，手臂成 W 字）",
+        "拇指朝上，全程手臂尽量不弯（W 字除外）"
+      ],
+      grip: "不需要器材；可以两手各握一瓶水增加一点阻力",
+      gaze: "看地面，不要抬头",
+      tempo: "抬起 1 秒 → 顶峰停 1 秒 → 下放 2 秒，每个形状做 12 次",
+      range: "只把手臂抬离地面 5～10 厘米就够，重点是肩胛骨往中间夹紧",
+      feel: "肩膀后侧和肩胛骨之间发酸，做到后面会很累",
+      bad: "耸肩＝抬之前先把肩膀往下压；脖子用力＝看地面别抬头；只用手臂抬＝要想着用肩胛骨带动",
+      fix: "圆肩驼背会让腹部看起来更大、身高显矮。这个动作专门练后束和上背，是改善圆肩最关键的一个，每周做 2～3 次，两三周后侧面照镜子就能看出区别",
+      safe: "重量用一瓶水就够，这个动作要的是控制，不是负重"
+    }
+  });
+
+  Object.assign(EXDETAIL, {
+    "箭步蹲": {
+      setup: [
+        "站直，双脚与髋同宽，双手叉腰或自然下垂",
+        "向前迈出一大步（大约一条腿的长度）",
+        "上身保持直立，不要前倾也不要后仰"
+      ],
+      grip: "不需要器材；站不稳就一只手扶墙",
+      gaze: "看正前方，不要低头看脚",
+      tempo: "下蹲 2 秒 → 底部停 0.5 秒 → 站起 2 秒",
+      range: "下蹲到两个膝盖都弯成约 90 度、后膝接近地面但不碰地；用前脚的脚跟推地站起来，再换另一条腿",
+      feel: "前腿的臀部和大腿前侧发酸",
+      bad: "前膝超过脚尖太多＝步子迈小一点；身体左右晃＝放慢速度，或者扶墙做；后膝砸到地面＝下蹲速度太快，要控制住",
+      fix: "这是双腿动作里最容易升级成单侧、进而变难的一个。太轻松就改成「反向箭步蹲」（向后迈步），对膝盖更友好也更有挑战",
+      safe: "膝盖不舒服就改成反向箭步蹲或者靠墙静蹲。地上垫瑜伽垫保护膝盖"
+    },
+    "单腿硬拉（徒手）": {
+      setup: [
+        "单脚站立，另一条腿向后伸、脚尖点地起步",
+        "支撑腿膝盖微屈并固定住，上身挺直",
+        "新手：一只手扶墙或椅子靠背找平衡"
+      ],
+      grip: "不需要器材，双手可以叉腰或向前伸",
+      gaze: "看身前 1～2 米的地面，不要抬头也不要低头看脚",
+      tempo: "下放 3 秒 → 底部停 0.5 秒 → 用臀部推回来 1～2 秒",
+      range: "髋部向后推，上身向前倾，后腿向后伸，直到身体和后腿大致成一条与地面平行的直线；再用臀部发力站起来",
+      feel: "支撑腿的大腿后侧被拉伸、臀部收紧",
+      bad: "身体歪向一侧＝扶着墙做，先把平衡找好；腰部酸＝在弯腰，不是屈髋；站不稳＝后脚先点地开始，练稳了再完全抬起",
+      fix: "前两周扶着墙、后脚点地做，把动作模式练对。这是徒手练大腿后侧最有效的动作",
+      safe: "踮脚站不稳的话穿袜子或赤脚在瑜伽垫上做，提高抓地感"
+    },
+    "臀桥行进": {
+      setup: [
+        "先做臀桥：仰卧屈膝，双脚踩地，把髋部顶起来并保持住",
+        "双手放身体两侧，掌心向下压地",
+        "髋部全程保持抬起的高度不下来"
+      ],
+      grip: "不需要器材，手掌压地稳定",
+      gaze: "看天花板，颈部放松",
+      tempo: "迈步 1 秒 → 停 1 秒，交替进行",
+      range: "保持髋部抬起，双脚交替抬起膝盖往胸口方向迈一小步再放下。一共走 10 步（每侧），髋部始终不掉",
+      feel: "臀部持续收紧发酸，大腿后侧也参与",
+      bad: "髋部掉下来＝核心和臀部没顶住，步子迈小一点；用腰顶＝先收腹再顶髋；颈部酸＝头在用力",
+      fix: "比单腿臀桥更难，因为它要求全程保持髋部高度。累了就先做单腿臀桥，隔周再回来做这个",
+      safe: "臀部和腹部全程收紧，感觉腰在发力就立刻停下休息"
+    },
+    "侧平板": {
+      setup: [
+        "侧躺，用下方的那只手肘撑地，肘在肩膀正下方",
+        "双脚叠放（简单版：下方那条腿的膝盖着地）",
+        "身体从头顶到脚踝连成一条直线"
+      ],
+      grip: "手握拳或手掌平放，不要用力攥",
+      gaze: "看正前方",
+      tempo: "静态保持 30 秒（每侧），正常呼吸",
+      range: "把髋部抬离地面顶起来，不要往下沉；保持到身体开始抖再坚持 5 秒",
+      feel: "身体侧面的腹斜肌（腰部两侧）发酸",
+      bad: "髋部下垂＝没顶起来；身体前后倾斜＝靠墙做更容易保持；肩膀疼＝肘部不在肩膀正下方",
+      fix: "太难就把下方的膝盖着地做跪姿侧平板。太简单就把上方那条腿抬起",
+      safe: "肩关节有压力就把小臂的接触面积放大一点，别只压在肘尖上"
+    },
+    "自重循环": {
+      setup: [
+        "按顺序做，中间不休息：深蹲 20 次 → 俯卧撑 10 次 → 箭步蹲 10 次（每侧）→ 平板支撑 40 秒 → 登山跑 30 秒",
+        "一整圈做完算 1 轮，休息 90 秒，做 3 轮",
+        "地方铺好瑜伽垫，旁边放一瓶水"
+      ],
+      grip: "不需要任何器材",
+      gaze: "每个动作按各自的要求",
+      tempo: "整轮约 5～7 分钟，休息 90 秒",
+      range: "动作质量优先：宁可少做几次，也不要为了赶时间把动作做变形",
+      feel: "心跳很快、呼吸急促但还能说短句，做完会出很多汗",
+      bad: "喘到说不出话＝把休息延长到 120 秒；某一轮动作变形了＝那一轮就停，不要硬撑",
+      fix: "这是没时间去散步时的替代方案，也是下雨天在家最方便的有氧。太轻松就把每个动作的次数加 5 次，或者休息减到 60 秒",
+      safe: "楼下有邻居的话注意时间，晚上 9 点后改成不落地的版本（平板、登山跑换成死虫）"
+    },
+    "快走": {
+      setup: [
+        "户外快走，穿舒服的鞋",
+        "身体站直，眼睛看正前方，手臂自然摆动"
+      ],
+      grip: "不需要器材",
+      gaze: "看正前方",
+      tempo: "持续 30～40 分钟",
+      range: "强度标准：能说完整的句子，但不能唱歌",
+      feel: "微微出汗，呼吸加快但不喘",
+      bad: "走完特别累＝走太久了，先减到 20 分钟",
+      fix: "家里原地踏步也行，但要保证出汗并且持续 30 分钟以上",
+      safe: "这是整个计划里最安全、性价比最高的消耗方式，比任何高强度训练都更容易长期坚持"
+    },
+    "轻松散步": {
+      setup: [
+        "穿舒服的鞋，正常走路就行",
+        "不需要追求速度，走到微微发热即可"
+      ],
+      grip: "不需要器材",
+      gaze: "放松",
+      tempo: "30～40 分钟",
+      range: "能轻松聊天、不喘",
+      feel: "心情放松，腿有点热但不酸",
+      bad: "走完特别累＝走太久了，减到 20 分钟",
+      fix: "休息日的散步是为了恢复和增加日常消耗，不是训练，不要给自己压力",
+      safe: "恢复也是训练的一部分。休息日不要偷偷加练力量"
+    },
+    "拉伸 + 体态训练": {
+      setup: [
+        "靠墙站立 2 分钟：后脑、肩胛、臀、脚跟四点贴墙",
+        "门框扩胸 2 组 × 30 秒：手肘呈 90 度撑在门框两侧，身体向前送",
+        "死虫式 2 组 × 10 次（每侧）：腰全程贴地",
+        "鸟狗式 2 组 × 10 次（每侧）：四点撑地，对侧手脚慢慢伸出，背保持平"
+      ],
+      grip: "不需要器材",
+      gaze: "颈部放松，正常呼吸",
+      tempo: "总共 8～10 分钟，每天做",
+      range: "拉伸到有轻微牵扯感就停",
+      feel: "胸口、肩膀前侧被打开的感觉",
+      bad: "做的时候腰酸＝腰在代偿，减小幅度",
+      fix: "圆肩驼背会让腹部看起来更大、身高显矮。这 10 分钟每天做，两三周后照镜子侧面就能看出区别",
+      safe: "不要弹震式拉伸；有任何刺痛就停"
+    }
+  });
+  // ---------- 存储 ----------
+  var STORE_KEY = "bojii-fitness2-v1";
+  var openDetails = {};
+
+  function getDetail(name){
+    if(EXDETAIL[name]) return EXDETAIL[name];
+    var keys = Object.keys(EXDETAIL);
+    var parts = name.split(/[+\/]/).map(function(s){ return s.trim(); });
+    for(var i=0;i<parts.length;i++){
+      for(var j=0;j<keys.length;j++){
+        if(keys[j].indexOf(parts[i]) === 0 || parts[i].indexOf(keys[j]) === 0) return EXDETAIL[keys[j]];
+      }
+    }
+    return null;
+  }
+
+  function detailHTML(d){
+    var h = "";
+    if(d.setup && d.setup.length){
+      h += '<div class="sec"><b>① 准备（按顺序做）</b><ol class="list">';
+      for(var i=0;i<d.setup.length;i++) h += "<li>" + d.setup[i] + "</li>";
+      h += "</ol></div>";
+    }
+    var rows = [
+      ["② 握法", d.grip],
+      ["③ 视线看哪里", d.gaze],
+      ["④ 节奏（按秒数做）", d.tempo],
+      ["⑤ 幅度标准", d.range],
+      ["⑥ 做对了是什么感觉", d.feel],
+      ["⑦ 做错了是什么感觉", d.bad],
+      ["⑧ 找不到感觉 / 卡住了怎么办", d.fix],
+      ["⑨ 安全提醒", d.safe]
+    ];
+    for(var k=0;k<rows.length;k++){
+      if(rows[k][1]) h += '<div class="sec"><b>' + rows[k][0] + '</b><div class="dtxt">' + rows[k][1] + '</div></div>';
+    }
+    return h;
+  }
+
+  function makeDetail(name){
+    var det = getDetail(name);
+    if(!det) return null;
+    var wrap = document.createElement("div");
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "detailbtn";
+    var panel = document.createElement("div");
+    panel.className = "detail";
+    panel.innerHTML = detailHTML(det);
+    var open = !!openDetails[name];
+    function apply(){
+      panel.hidden = !open;
+      btn.setAttribute("aria-expanded", open ? "true" : "false");
+      btn.textContent = open ? "▾ 收起详细步骤" : "▸ 详细步骤（照着做）";
+    }
+    btn.addEventListener("click", function(){
+      open = !open;
+      openDetails[name] = open;
+      apply();
+    });
+    apply();
+    wrap.appendChild(btn);
+    wrap.appendChild(panel);
+    return wrap;
+  }
+  var mem = {done:{}, weights:{}, logs:[]};
+  var canStore = true;
+  try{
+    localStorage.setItem("__t","1");
+    localStorage.removeItem("__t");
+  }catch(e){ canStore = false; }
+
+  function load(){
+    if(!canStore) return mem;
+    try{
+      var raw = localStorage.getItem(STORE_KEY);
+      if(!raw) return mem;
+      var o = JSON.parse(raw);
+      return {
+        done: o.done || {},
+        weights: o.weights || {},
+        logs: o.logs || []
+      };
+    }catch(e){ return mem; }
+  }
+  function save(){
+    if(!canStore) return;
+    try{ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }catch(e){}
+  }
+  var state = load();
+
+  // ---------- 工具 ----------
+  function $(id){ return document.getElementById(id); }
+  function pad(n){ return n<10 ? "0"+n : ""+n; }
+  function dateKey(d){ return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate()); }
+  var today = new Date();
+  var todayK = dateKey(today);
+  var curDay = today.getDay();
+
+  function beep(){
+    try{
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if(!AC) return;
+      var ctx = new AC();
+      var osc = ctx.createOscillator();
+      var gain = ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.value = 880;
+      gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.35, ctx.currentTime + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.6);
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.65);
+      setTimeout(function(){ try{ ctx.close(); }catch(e){} }, 900);
+    }catch(e){}
+  }
+  function buzz(pattern){
+    try{ if(navigator.vibrate) navigator.vibrate(pattern); }catch(e){}
+  }
+
+  // ---------- 休息计时器 ----------
+  var timerId = null, remain = 0;
+  function stopTimer(){
+    if(timerId){ clearInterval(timerId); timerId = null; }
+    $("timer").classList.remove("on");
+  }
+  function startTimer(sec){
+    if(!sec || sec <= 0) return;
+    if(timerId) clearInterval(timerId);
+    remain = sec;
+    $("timer").classList.add("on");
+    renderTimer();
+    timerId = setInterval(function(){
+      remain--;
+      if(remain <= 0){
+        clearInterval(timerId); timerId = null;
+        $("timer-num").textContent = "0:00";
+        beep(); buzz([200,100,200,100,400]);
+        setTimeout(function(){ $("timer").classList.remove("on"); }, 1500);
+        return;
+      }
+      renderTimer();
+    }, 1000);
+  }
+  function renderTimer(){
+    var m = Math.floor(remain/60), s = remain % 60;
+    $("timer-num").textContent = m + ":" + pad(s);
+  }
+  $("timer-stop").addEventListener("click", stopTimer);
+  $("timer-add").addEventListener("click", function(){
+    if(timerId){ remain += 30; renderTimer(); }
+  });
+
+  // ---------- 今日 ----------
+  function buildsets(doneArr, total){
+    var out = [];
+    for(var i=0;i<total;i++) out.push(doneArr && doneArr[i] === true);
+    return out;
+  }
+
+  function dayDone(dayKey, ex){
+    var d = state.done[todayK] || {};
+    var arr = d[ex.n] || [];
+    var cnt = 0;
+    for(var i=0;i<ex.s;i++) if(arr[i]) cnt++;
+    return cnt;
+  }
+
+  function updateProgress(){
+    var p = PLAN[curDay];
+    var totalSets = 0, doneSets = 0;
+    p.ex.forEach(function(ex){
+      totalSets += ex.s;
+      doneSets += dayDone(null, ex);
+    });
+    var pct = totalSets ? Math.round(doneSets*100/totalSets) : 0;
+    $("done-pct").textContent = pct + "%";
+    $("done-bar").style.width = pct + "%";
+    $("plan-count").textContent = DAY_NAME[curDay] + " · 已完成 " + doneSets + "/" + totalSets + " 组";
+  }
+
+  function renderToday(){
+    var p = PLAN[curDay];
+    $("plan-name").textContent = p.name;
+    updateProgress();
+
+    var host = $("ex-list");
+    host.innerHTML = "";
+
+    p.ex.forEach(function(ex){
+      var d = state.done[todayK] || {};
+      var arr = buildsets(d[ex.n], ex.s);
+      var cnt = arr.filter(Boolean).length;
+
+      var box = document.createElement("div");
+      box.className = "ex" + (cnt === ex.s ? " done" : "");
+
+      var head = document.createElement("div");
+      head.innerHTML = '<div class="name"></div><div class="meta"></div>';
+      head.querySelector(".name").textContent = ex.n;
+      head.querySelector(".meta").textContent = ex.s + " 组 × " + ex.r + (ex.rest ? "　休息 " + ex.rest + "s" : "");
+      box.appendChild(head);
+
+      var cue = document.createElement("div");
+      cue.className = "cue";
+      cue.textContent = ex.c;
+      box.appendChild(cue);
+
+      var detail = makeDetail(ex.n);
+      if(detail) box.appendChild(detail);
+
+      var sets = document.createElement("div");
+      sets.className = "sets";
+      for(var i=0;i<ex.s;i++){
+        (function(idx){
+          var b = document.createElement("button");
+          b.type = "button";
+          b.className = "set";
+          b.textContent = idx+1;
+          b.setAttribute("aria-pressed", arr[idx] ? "true" : "false");
+          b.addEventListener("click", function(){
+            var cur = state.done[todayK] || {};
+            var row = cur[ex.n] || [];
+            var now = !row[idx];
+            row[idx] = now;
+            cur[ex.n] = row;
+            state.done[todayK] = cur;
+            save();
+            b.setAttribute("aria-pressed", now ? "true" : "false");
+            var n = 0;
+            for(var k=0;k<ex.s;k++) if(row[k]) n++;
+            if(n === ex.s) box.classList.add("done"); else box.classList.remove("done");
+            if(now) startTimer(ex.rest);
+            updateProgress();
+          });
+          sets.appendChild(b);
+        })(i);
+      }
+      box.appendChild(sets);
+
+      var wrow = document.createElement("div");
+      wrow.className = "wrow";
+      var lab = document.createElement("label");
+      lab.textContent = "用的重量";
+      var inp = document.createElement("input");
+      inp.type = "text";
+      inp.inputMode = "decimal";
+      inp.placeholder = "kg";
+      inp.value = state.weights[ex.n] || "";
+      inp.addEventListener("input", function(){
+        state.weights[ex.n] = inp.value;
+        save();
+      });
+      inp.addEventListener("blur", function(){
+        state.weights[ex.n] = inp.value;
+        save();
+      });
+      var unit = document.createElement("span");
+      unit.className = "muted";
+      unit.textContent = "kg（写一次就记住了）";
+      wrow.appendChild(lab); wrow.appendChild(inp); wrow.appendChild(unit);
+      box.appendChild(wrow);
+
+      host.appendChild(box);
+    });
+  }
+
+  // 星期选择
+  function renderChips(){
+    var host = $("day-chips");
+    host.innerHTML = "";
+    var order = [1,2,3,4,5,6,0];
+    order.forEach(function(d){
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "chip";
+      b.textContent = DAY_NAME[d] + (d === today.getDay() ? "（今天）" : "");
+      b.setAttribute("aria-pressed", d === curDay ? "true" : "false");
+      b.addEventListener("click", function(){
+        curDay = d;
+        renderChips();
+        renderToday();
+      });
+      host.appendChild(b);
+    });
+  }
+
+  function updateHeader(){
+    $("today-title").textContent = "徒手版 · " + today.getFullYear() + "/" + pad(today.getMonth()+1) + "/" + pad(today.getDate());
+    $("today-sub").textContent = DAY_NAME[today.getDay()] + "　" + PLAN[today.getDay()].name;
+  }
+
+  // ---------- 记录 ----------
+  function fmt(v){ return (v === undefined || v === null || v === "") ? "—" : v; }
+
+  function chart(host, field, color, unit){
+    var pts = state.logs
+      .filter(function(l){ return l[field] !== undefined && l[field] !== "" && !isNaN(parseFloat(l[field])); })
+      .map(function(l){ return {d:l.date, v:parseFloat(l[field])}; })
+      .sort(function(a,b){ return a.d < b.d ? -1 : 1; });
+
+    if(pts.length === 0){
+      host.innerHTML = '<div class="empty">还没有数据，保存一条记录就会出图</div>';
+      return;
+    }
+
+    var W = 340, H = 150, P = {l:38, r:12, t:14, b:26};
+    var vals = pts.map(function(p){ return p.v; });
+    var mn = Math.min.apply(null, vals), mx = Math.max.apply(null, vals);
+    if(mn === mx){ mn -= 1; mx += 1; }
+    var sp = mx - mn;
+    mn -= sp*0.2; mx += sp*0.2;
+    var iw = W - P.l - P.r, ih = H - P.t - P.b;
+
+    function X(i){ return pts.length === 1 ? P.l + iw/2 : P.l + iw*i/(pts.length-1); }
+    function Y(v){ return P.t + ih*(1 - (v-mn)/(mx-mn)); }
+
+    var path = "";
+    pts.forEach(function(p,i){
+      path += (i ? " L" : "M") + X(i).toFixed(1) + " " + Y(p.v).toFixed(1);
+    });
+
+    var dots = "";
+    pts.forEach(function(p,i){
+      dots += '<circle cx="'+X(i).toFixed(1)+'" cy="'+Y(p.v).toFixed(1)+'" r="3.5" fill="'+color+'"><title>'+p.d+"  "+p.v+unit+'</title></circle>';
+    });
+
+    var yTicks = "";
+    [mn + (mx-mn)*0.1, (mn+mx)/2, mx - (mx-mn)*0.1].forEach(function(v){
+      yTicks += '<text x="'+(P.l-6)+'" y="'+(Y(v)+4).toFixed(1)+'" text-anchor="end" font-size="10" fill="var(--muted)">'+v.toFixed(1)+'</text>';
+    });
+
+    var first = pts[0].d.slice(5), last = pts[pts.length-1].d.slice(5);
+    var xLabels = '<text x="'+P.l+'" y="'+(H-8)+'" font-size="10" fill="var(--muted)">'+first+'</text>';
+    if(pts.length > 1){
+      xLabels += '<text x="'+(W-P.r)+'" y="'+(H-8)+'" text-anchor="end" font-size="10" fill="var(--muted)">'+last+'</text>';
+    }
+
+    var delta = pts.length > 1 ? (pts[pts.length-1].v - pts[0].v) : 0;
+    var deltaTxt = pts.length > 1 ? ('共变化 ' + (delta>0?"+":"") + delta.toFixed(1) + unit) : '';
+
+    host.innerHTML =
+      '<svg viewBox="0 0 '+W+' '+H+'" width="100%" height="'+H+'" role="img" aria-label="'+field+'趋势图">'+
+        '<line x1="'+P.l+'" y1="'+(P.t+ih)+'" x2="'+(W-P.r)+'" y2="'+(P.t+ih)+'" stroke="var(--line)"/>'+
+        yTicks + xLabels +
+        '<path d="'+path+'" fill="none" stroke="'+color+'" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>'+
+        dots +
+      '</svg>'+
+      '<div class="muted">'+deltaTxt+'</div>';
+  }
+
+  function renderLogs(){
+    chart($("chart-weight"), "weight", "var(--accent)", " kg");
+    chart($("chart-waist"), "waist", "var(--ok)", " cm");
+
+    var rows = state.logs.slice().sort(function(a,b){ return a.date < b.date ? 1 : -1; });
+    var t = $("log-table");
+    if(rows.length === 0){
+      t.innerHTML = '<tr><td class="empty">还没有记录</td></tr>';
+      return;
+    }
+    var html = '<tr><th>日期</th><th>体重</th><th>腰围</th><th>臂围</th><th>小腿</th><th>睡眠</th><th>备注</th><th></th></tr>';
+    rows.forEach(function(l,i){
+      html += '<tr>'+
+        '<td>'+l.date.slice(5)+'</td>'+
+        '<td>'+fmt(l.weight)+'</td>'+
+        '<td>'+fmt(l.waist)+'</td>'+
+        '<td>'+fmt(l.arm)+'</td>'+
+        '<td>'+fmt(l.calf)+'</td>'+
+        '<td>'+fmt(l.sleep)+'</td>'+
+        '<td>'+fmt(l.note)+'</td>'+
+        '<td><button class="ghost" data-del="'+rows[i].date+'" style="padding:4px 10px;min-height:32px;font-size:12px">删</button></td>'+
+      '</tr>';
+    });
+    t.innerHTML = html;
+    Array.prototype.forEach.call(t.querySelectorAll("[data-del]"), function(b){
+      b.addEventListener("click", function(){
+        var d = b.getAttribute("data-del");
+        state.logs = state.logs.filter(function(l){ return l.date !== d; });
+        save(); renderLogs();
+      });
+    });
+  }
+
+  $("save-log").addEventListener("click", function(){
+    var date = $("f-date").value || todayK;
+    var entry = {
+      date: date,
+      weight: $("f-weight").value,
+      waist: $("f-waist").value,
+      arm: $("f-arm").value,
+      calf: $("f-calf").value,
+      sleep: $("f-sleep").value,
+      note: $("f-note").value
+    };
+    var found = false;
+    state.logs = state.logs.map(function(l){
+      if(l.date === date){ found = true; return entry; }
+      return l;
+    });
+    if(!found) state.logs.push(entry);
+    save();
+    renderLogs();
+    var btn = $("save-log");
+    btn.textContent = found ? "已更新 ✓" : "已保存 ✓";
+    setTimeout(function(){ btn.textContent = "保存记录"; }, 1400);
+  });
+
+  $("clear-form").addEventListener("click", function(){
+    ["f-weight","f-waist","f-arm","f-calf","f-sleep","f-note"].forEach(function(id){ $(id).value = ""; });
+  });
+
+  $("btn-export").addEventListener("click", function(){
+    var txt = JSON.stringify(state, null, 2);
+    $("import-box").value = txt;   // 同时留在文本框里，下载失败也能手动复制
+    $("import-msg").textContent = "备份已生成";
+    var blob = new Blob([txt], {type:"application/json"});
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "训练备份-" + todayK + ".json";
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+  });
+
+  $("btn-copy").addEventListener("click", function(){
+    var txt = JSON.stringify(state);
+    var msg = $("import-msg");
+    function ok(){ msg.textContent = "已复制，发到自己的微信/备忘录保存"; }
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(txt).then(ok, function(){ fallback(); });
+    }else{
+      fallback();
+    }
+    function fallback(){
+      $("import-box").value = txt;
+      msg.textContent = "已填入下方文本框，长按全选复制";
+    }
+  });
+
+  $("btn-import").addEventListener("click", function(){
+    var msg = $("import-msg");
+    try{
+      var o = JSON.parse($("import-box").value);
+      if(!o || typeof o !== "object") throw new Error("bad");
+      state.done = o.done || {};
+      state.weights = o.weights || {};
+      state.logs = o.logs || [];
+      save();
+      renderToday(); renderLogs();
+      msg.textContent = "导入成功";
+    }catch(e){
+      msg.textContent = "数据格式不对，请检查是否复制完整";
+    }
+  });
+
+  // ---------- 速查 ----------
+  function renderRef(){
+    var host = $("ref-ex");
+    var order = [1,2,3,4,5,6,0];
+    order.forEach(function(d){
+      var p = PLAN[d];
+      var det = document.createElement("details");
+      var sum = document.createElement("summary");
+      sum.textContent = DAY_NAME[d] + " · " + p.name;
+      det.appendChild(sum);
+      p.ex.forEach(function(ex){
+        var div = document.createElement("div");
+        div.style.margin = "8px 0";
+        div.innerHTML = '<div><b></b><span class="muted"></span></div><div class="cue"></div>';
+        div.querySelector("b").textContent = ex.n;
+        div.querySelector(".muted").textContent = "　" + ex.s + " 组 × " + ex.r;
+        div.querySelector(".cue").textContent = ex.c;
+        det.appendChild(div);
+        var dx = makeDetail(ex.n);
+        if(dx) det.appendChild(dx);
+      });
+      host.appendChild(det);
+    });
+  }
+
+  // ---------- 导航 ----------
+  function show(which){
+    ["today","log","ref"].forEach(function(k){
+      $("tab-" + k).classList.toggle("on", k === which);
+      $("nav-" + k).setAttribute("aria-selected", k === which ? "true" : "false");
+    });
+    if(which === "log") renderLogs();
+    window.scrollTo(0,0);
+  }
+  $("nav-today").addEventListener("click", function(){ show("today"); });
+  $("nav-log").addEventListener("click", function(){ show("log"); });
+  $("nav-ref").addEventListener("click", function(){ show("ref"); });
+
+  // ---------- 启动 ----------
+  $("f-date").value = todayK;
+  updateHeader();
+  renderChips();
+  renderToday();
+  renderRef();
+  if(!canStore){
+    var warn = document.createElement("div");
+    warn.className = "card";
+    warn.style.borderColor = "var(--warn)";
+    warn.innerHTML = '<b>提示：这台设备无法自动保存</b><div class="note">记录可能只在本次打开期间有效。练习完请到「记录」页导出备份。</div>';
+    $("tab-today").insertBefore(warn, $("tab-today").firstChild);
+  }
+})();
+</script>
+</body>
+</html>
