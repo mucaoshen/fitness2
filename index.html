@@ -130,6 +130,20 @@ details[open] summary{margin-bottom:8px}
 .detail .dtxt{font-size:13px;line-height:1.7}
 .detail ol.list{font-size:13px;padding-left:20px;margin:0}
 .detail ol.list li{margin:6px 0}
+.daily{margin-top:10px;display:flex;flex-direction:column;gap:8px}
+.dailytask{
+  display:flex;align-items:center;gap:10px;width:100%;text-align:left;
+  background:var(--surface2);border:1px solid var(--line);border-radius:10px;
+  padding:10px 12px;font-family:inherit;font-size:14px;color:var(--fg);cursor:pointer;min-height:54px
+}
+.dailytask[aria-pressed="true"]{border-color:var(--ok)}
+.dailytask .dbox{
+  flex:0 0 auto;width:24px;height:24px;border-radius:7px;border:1.5px solid var(--line);
+  display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700
+}
+.dailytask[aria-pressed="true"] .dbox{background:var(--ok);border-color:var(--ok);color:#06251a}
+.dailytask .dtxtwrap{display:flex;flex-direction:column;gap:2px;min-width:0}
+.dailytask .dtxtwrap .muted{font-size:12px;line-height:1.35}
 </style>
 </head>
 <body>
@@ -167,6 +181,15 @@ details[open] summary{margin-bottom:8px}
         </div>
       </div>
       <div class="progress"><i id="done-bar" style="width:0%"></i></div>
+    </div>
+
+    <div class="card">
+      <div class="row between">
+        <h2 style="margin:0">每天固定任务</h2>
+        <span class="muted" id="daily-count">0/2</span>
+      </div>
+      <div class="daily" id="daily-list"></div>
+      <div class="note">这两件事跟当天练什么无关，每天都要做。力量训练只排 4 天，但有氧可以天天做。</div>
     </div>
 
     <div id="ex-list"></div>
@@ -896,7 +919,7 @@ details[open] summary{margin-bottom:8px}
     wrap.appendChild(panel);
     return wrap;
   }
-  var mem = {done:{}, weights:{}, logs:[]};
+  var mem = {done:{}, weights:{}, logs:[], daily:{}};
   var canStore = true;
   try{
     localStorage.setItem("__t","1");
@@ -912,7 +935,8 @@ details[open] summary{margin-bottom:8px}
       return {
         done: o.done || {},
         weights: o.weights || {},
-        logs: o.logs || []
+        logs: o.logs || [],
+        daily: o.daily || {}
       };
     }catch(e){ return mem; }
   }
@@ -1000,6 +1024,50 @@ details[open] summary{margin-bottom:8px}
     return cnt;
   }
 
+  var DAILY = [
+    {k:"walk", t:"晚间快走 40 分钟", s:"低强度：能说完整句子，但不能唱歌"},
+    {k:"steps", t:"今日步数 8000+", s:"手机自带计步就行，不用额外设备"}
+  ];
+
+  function renderDaily(){
+    var host = $("daily-list");
+    if(!host) return;
+    var d = state.daily[todayK] || {};
+    host.innerHTML = "";
+    var n = 0;
+    DAILY.forEach(function(item){
+      var on = !!d[item.k];
+      if(on) n++;
+      var row = document.createElement("button");
+      row.type = "button";
+      row.className = "dailytask";
+      row.setAttribute("aria-pressed", on ? "true" : "false");
+      var box = document.createElement("span");
+      box.className = "dbox";
+      box.textContent = on ? "✓" : "";
+      var wrap = document.createElement("span");
+      wrap.className = "dtxtwrap";
+      var b = document.createElement("b");
+      b.textContent = item.t;
+      var sub = document.createElement("span");
+      sub.className = "muted";
+      sub.textContent = item.s;
+      wrap.appendChild(b);
+      wrap.appendChild(sub);
+      row.appendChild(box);
+      row.appendChild(wrap);
+      row.addEventListener("click", function(){
+        var cur = state.daily[todayK] || {};
+        cur[item.k] = !cur[item.k];
+        state.daily[todayK] = cur;
+        save();
+        renderDaily();
+      });
+      host.appendChild(row);
+    });
+    $("daily-count").textContent = n + "/" + DAILY.length;
+  }
+
   function updateProgress(){
     var p = PLAN[curDay];
     var totalSets = 0, doneSets = 0;
@@ -1017,6 +1085,7 @@ details[open] summary{margin-bottom:8px}
     var p = PLAN[curDay];
     $("plan-name").textContent = p.name;
     updateProgress();
+    renderDaily();
 
     var host = $("ex-list");
     host.innerHTML = "";
@@ -1280,6 +1349,7 @@ details[open] summary{margin-bottom:8px}
       state.done = o.done || {};
       state.weights = o.weights || {};
       state.logs = o.logs || [];
+      state.daily = o.daily || {};
       save();
       renderToday(); renderLogs();
       msg.textContent = "导入成功";
