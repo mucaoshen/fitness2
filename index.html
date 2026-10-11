@@ -452,6 +452,8 @@ details[open] summary{margin-bottom:8px}
       {n:"拉伸 + 体态训练",s:1,r:"10 分钟",rest:0,c:"靠墙站、扩胸、死虫、鸟狗"}
     ]}
   };
+  // 这些动作不需要记录难度级别（有氧、拉伸、休息、循环）
+  var NO_WEIGHT = ["快走 / 爬楼梯","核心循环","快走","自重循环","轻松散步","拉伸 + 体态训练"];
   var DAY_NAME = ["周日","周一","周二","周三","周四","周五","周六"];
 
   // ---------- 动作详细步骤 ----------
@@ -1142,28 +1144,30 @@ details[open] summary{margin-bottom:8px}
       }
       box.appendChild(sets);
 
-      var wrow = document.createElement("div");
-      wrow.className = "wrow";
-      var lab = document.createElement("label");
-      lab.textContent = "难度级别";
-      var inp = document.createElement("input");
-      inp.type = "text";
-      inp.inputMode = "text";
-      inp.placeholder = "例：标准";
-      inp.value = state.weights[ex.n] || "";
-      inp.addEventListener("input", function(){
-        state.weights[ex.n] = inp.value;
-        save();
-      });
-      inp.addEventListener("blur", function(){
-        state.weights[ex.n] = inp.value;
-        save();
-      });
-      var unit = document.createElement("span");
-      unit.className = "muted";
-      unit.textContent = "（写一次就记住了）";
-      wrow.appendChild(lab); wrow.appendChild(inp); wrow.appendChild(unit);
-      box.appendChild(wrow);
+      if(NO_WEIGHT.indexOf(ex.n) < 0){
+        var wrow = document.createElement("div");
+        wrow.className = "wrow";
+        var lab = document.createElement("label");
+        lab.textContent = "难度级别";
+        var inp = document.createElement("input");
+        inp.type = "text";
+        inp.inputMode = "text";
+        inp.placeholder = "例：标准";
+        inp.value = state.weights[ex.n] || "";
+        inp.addEventListener("input", function(){
+          state.weights[ex.n] = inp.value;
+          save();
+        });
+        inp.addEventListener("blur", function(){
+          state.weights[ex.n] = inp.value;
+          save();
+        });
+        var unit = document.createElement("span");
+        unit.className = "muted";
+        unit.textContent = "（写一次就记住了）";
+        wrow.appendChild(lab); wrow.appendChild(inp); wrow.appendChild(unit);
+        box.appendChild(wrow);
+      }
 
       host.appendChild(box);
     });
