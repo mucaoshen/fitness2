@@ -135,6 +135,15 @@ details[open] summary{margin-bottom:8px}
 .eLeg{margin:0 0 13px;padding-left:22px;font-size:13px;line-height:1.65}
 .eLeg li{margin:5px 0}
 .eLeg li::marker{color:var(--accent);font-weight:700}
+.rsec{display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:600;color:var(--accent);margin:14px 0 7px}
+.ritem{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--surface2);margin-bottom:8px;cursor:pointer;min-height:56px}
+.ritem.done{border-color:var(--ok)}
+.rbox{flex:0 0 auto;width:22px;height:22px;border-radius:6px;border:1.5px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700}
+.ritem.done .rbox{background:var(--ok);border-color:var(--ok);color:#06251a}
+.rtxt{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.rtxt b{font-size:13.5px;font-weight:600}
+.rtxt i{font-size:12px;color:var(--muted);font-style:normal;line-height:1.45}
+.rbtn{flex:0 0 auto;font-size:12.5px;font-weight:600;color:var(--accent);border:1px solid var(--line);border-radius:8px;padding:8px 11px;background:var(--surface);font-family:inherit;cursor:pointer;min-height:38px}
 .daily{margin-top:10px;display:flex;flex-direction:column;gap:8px}
 .dailytask{
   display:flex;align-items:center;gap:10px;width:100%;text-align:left;
@@ -213,7 +222,10 @@ details[open] summary{margin-bottom:8px}
     </div>
 
     <div class="card">
-      <h2>训练后放松（5～10 分钟）</h2>
+      <div class="row between">
+        <h2 style="margin:0">训练后放松（5～10 分钟）</h2>
+        <span class="muted" id="relax-count">0/0</span>
+      </div>
       <div id="relax-body"></div>
       <div class="note">泡沫轴每个部位滚 30～60 秒，慢滚（每秒 2～3 厘米），力度到「舒服的酸痛」就够，不要疼到咬牙。滚完接着做拉伸。</div>
       <div class="note" style="color:var(--warn)">⚠️ 下背正中（腰椎）、关节、以及骨头突出的地方绝对不能滚。</div>
@@ -1032,17 +1044,33 @@ details[open] summary{margin-bottom:8px}
     var host = $("relax-body");
     if(!host) return;
     var r = RELAX[curDay];
-    if(!r){ host.innerHTML = ""; return; }
-    var h = '<div style="font-size:13.5px;margin-bottom:10px">' + r.hint + "</div>";
-    h += '<div style="font-size:13px;font-weight:600;color:var(--accent);margin:10px 0 6px">泡沫轴（每个 30～60 秒）</div><table class="swap">';
-    r.roll.forEach(function(x){
-      h += "<tr><td><b>" + x[0] + "</b></td><td>" + x[1] + "</td></tr>";
-    });
-    h += "</table>";
-    h += '<div style="font-size:13px;font-weight:600;color:var(--accent);margin:12px 0 6px">静态拉伸（每个 30 秒 × 2 组）</div><ul class="list">';
-    r.stretch.forEach(function(s){ h += "<li>" + s + "</li>"; });
-    h += "</ul>";
+    if(!r){ host.innerHTML = ""; if($("relax-count")) $("relax-count").textContent = "0/0"; return; }
+    var done = state.relax[todayK] || {};
+    var total = r.roll.length + r.stretch.length;
+    var n = 0;
+    var h = '<div style="font-size:13.5px;margin-bottom:2px">' + r.hint + "</div>";
+
+    function section(title, items, prefix, sec, isRoll){
+      var got = 0;
+      var body = "";
+      items.forEach(function(x, i){
+        var name = isRoll ? x[0] : x;
+        var how = isRoll ? x[1] : "";
+        var k = prefix + i;
+        var on = !!done[k];
+        if(on){ n++; got++; }
+        body += '<div class="ritem' + (on ? " done" : "") + '" data-k="' + k + '">' +
+                '<span class="rbox">' + (on ? "✓" : "") + "</span>" +
+                '<span class="rtxt"><b>' + name + "</b>" + (how ? "<i>" + how + "</i>" : "") + "</span>" +
+                '<button type="button" class="rbtn" data-t="' + sec + '">' + sec + "s</button></div>";
+      });
+      return '<div class="rsec"><span>' + title + '</span><span class="muted">' + got + "/" + items.length + "</span></div>" + body;
+    }
+
+    h += section("泡沫轴 · 每个 45 秒", r.roll, "r", 45, true);
+    h += section("静态拉伸 · 每个 30 秒 × 2 组", r.stretch, "s", 30, false);
     host.innerHTML = h;
+    if($("relax-count")) $("relax-count").textContent = n + "/" + total;
   }
 
   function exKey(name){
@@ -1117,7 +1145,7 @@ details[open] summary{margin-bottom:8px}
     wrap.appendChild(panel);
     return wrap;
   }
-  var mem = {done:{}, weights:{}, logs:[], daily:{}};
+  var mem = {done:{}, weights:{}, logs:[], daily:{}, relax:{}};
   var canStore = true;
   try{
     localStorage.setItem("__t","1");
@@ -1134,7 +1162,8 @@ details[open] summary{margin-bottom:8px}
         done: o.done || {},
         weights: o.weights || {},
         logs: o.logs || [],
-        daily: o.daily || {}
+        daily: o.daily || {},
+        relax: o.relax || {}
       };
     }catch(e){ return mem; }
   }
@@ -1551,6 +1580,7 @@ details[open] summary{margin-bottom:8px}
       state.weights = o.weights || {};
       state.logs = o.logs || [];
       state.daily = o.daily || {};
+      state.relax = o.relax || {};
       save();
       renderToday(); renderLogs();
       msg.textContent = "导入成功";
@@ -1603,6 +1633,22 @@ details[open] summary{margin-bottom:8px}
   renderChips();
   renderToday();
   renderRef();
+
+  var relaxHost = $("relax-body");
+  if(relaxHost){
+    relaxHost.addEventListener("click", function(e){
+      var chip = e.target.closest ? e.target.closest(".rbtn") : null;
+      if(chip){ startTimer(parseInt(chip.getAttribute("data-t"), 10)); return; }
+      var item = e.target.closest ? e.target.closest(".ritem") : null;
+      if(!item) return;
+      var k = item.getAttribute("data-k");
+      var cur = state.relax[todayK] || {};
+      cur[k] = !cur[k];
+      state.relax[todayK] = cur;
+      save();
+      renderRelax();
+    });
+  }
   if(!canStore){
     var warn = document.createElement("div");
     warn.className = "card";
